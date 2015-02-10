@@ -3480,8 +3480,6 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
 
       var appendToBody =  attrs.typeaheadAppendToBody ? originalScope.$eval(attrs.typeaheadAppendToBody) : false;
 
-      var openOnFocus = originalScope.$eval(attrs.typeaheadOpenOnFocus) || false;
-
       //INTERNAL VARIABLES
 
       //model setter executed upon match selection
@@ -3719,7 +3717,6 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
       });
 
       element.bind('focus', function (evt) {
-        console.log(evt.target, evt.target.value);
         parseInput(evt.target.value);
       });
 
