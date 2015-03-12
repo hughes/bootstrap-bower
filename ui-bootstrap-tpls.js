@@ -3544,7 +3544,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
       //SUPPORTED ATTRIBUTES (OPTIONS)
 
       //minimal no of characters that needs to be entered before typeahead kicks-in
-      var minSearch = originalScope.$eval(attrs.typeaheadMinLength) || 1;
+      var minSearch = attrs.typeaheadMinLength === undefined ? 1 : originalScope.$eval(attrs.typeaheadMinLength);
 
       //minimal wait time after last character typed before typehead kicks-in
       var waitTime = originalScope.$eval(attrs.typeaheadWaitMs) || 0;
@@ -3675,7 +3675,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
       //we need to propagate user's query so we can higlight matches
       scope.query = undefined;
 
-      //Declare the timeout promise var outside the function scope so that stacked calls can be cancelled later 
+      //Declare the timeout promise var outside the function scope so that stacked calls can be cancelled later
       var timeoutPromise;
 
       var scheduleSearchWithTimeout = function(inputValue) {
@@ -3696,7 +3696,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
 
         hasFocus = true;
 
-        if (inputValue && inputValue.length >= minSearch) {
+        if (inputValue !== undefined && inputValue.length >= minSearch) {
           if (waitTime > 0) {
             cancelPreviousTimeout();
             scheduleSearchWithTimeout(inputValue);
@@ -3819,11 +3819,24 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
 
       $document.bind('click', dismissClickHandler);
 
+      var elementFocusHander = function (evt) {
+        // user relatedTarget to prevent re-listing after selecting
+        // only pop-up automatically for empty values $setViewValue also sets the model value and we don't have the proper model value available in this scope...
+        var currentValue = element.val();
+        if(minSearch === 0 && currentValue === '') {
+           hasFocus = true;
+           modelCtrl.$setViewValue(currentValue);
+           getMatchesAsync(currentValue);
+        }
+      };
+      element.bind('focus', elementFocusHander);
+
       originalScope.$on('$destroy', function(){
         $document.unbind('click', dismissClickHandler);
         if (appendToBody) {
           $popup.remove();
         }
+        element.unbind('focus', elementFocusHander);
       });
 
       var $popup = $compile(popUpEl)(scope);
